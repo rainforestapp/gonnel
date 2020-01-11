@@ -15,13 +15,14 @@ import (
 // a tunnel also can connect to ngrok directly
 // as long ngrok client server already running
 type Tunnel struct {
-	Proto         Protocol // Protocol that use in tunneling process
-	Name          string   // A name that used for creating or closing
-	LocalAddress  string   // Can be host with port or port only
-	Auth          string   // Username & password that will authenticate to access tunnel
-	Inspect       bool     // Inspect transaction data tunnel that will be logged in binary file
-	RemoteAddress string   // Result ngrok connection address
-	IsCreated     bool     // Information tunnel created or not
+	Proto         Protocol          // Protocol that use in tunneling process
+	Name          string            // A name that used for creating or closing
+	LocalAddress  string            // Can be host with port or port only
+	Auth          string            // Username & password that will authenticate to access tunnel
+	Inspect       bool              // Inspect transaction data tunnel that will be logged in binary file
+	ExtraOpts     map[string]string // Extra tunnel-level options to pass to the ngrok API
+	RemoteAddress string            // Result ngrok connection address
+	IsCreated     bool              // Information tunnel created or not
 }
 
 // Maximum retries until tunnel connected/closed
@@ -47,6 +48,9 @@ func (c *Client) CreateTunnel(t *Tunnel) (err error) {
 
 			if t.Proto.String() == "http" {
 				jsonData["bind_tls"] = true
+			}
+			for k, v := range t.ExtraOpts {
+				jsonData[k] = v
 			}
 
 			url := fmt.Sprintf("http://%s/api/tunnels", c.WebUIAddress)
